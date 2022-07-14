@@ -1,8 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
-import { v4 as uuidv4, validate } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import { findElementById, removeElement, validateUUID } from '../utils/helpers';
 
 @Injectable()
 export class TrackService {
@@ -20,30 +21,14 @@ export class TrackService {
   }
 
   findOne(id: string) {
-    if (!validate(id)) {
-      throw new HttpException(
-        'Bad request. trackId is invalid (not uuid)',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const element = this._tracks.find((track) => track.id === id);
-    if (element) {
-      return element;
-    }
-    throw new HttpException('Track was not found', HttpStatus.NOT_FOUND);
+    validateUUID(id);
+    const { element } = findElementById(this._tracks, id);
+    return element;
   }
 
   update(id: string, updateTrackDto: UpdateTrackDto) {
-    if (!validate(id)) {
-      throw new HttpException(
-        'Bad request. trackId is invalid (not uuid)',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const index = this._tracks.findIndex((track) => track.id === id);
-    if (index === -1) {
-      throw new HttpException('Track was not found', HttpStatus.NOT_FOUND);
-    }
+    validateUUID(id);
+    const { index } = findElementById(this._tracks, id);
     this._tracks[index] = new Track(id, {
       ...this._tracks[index],
       ...updateTrackDto,
@@ -52,12 +37,7 @@ export class TrackService {
   }
 
   remove(id: string) {
-    if (!validate(id)) {
-      throw new HttpException(
-        'Bad request. trackId is invalid (not uuid)',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    this._tracks = this._tracks.filter((track) => track.id !== id);
+    validateUUID(id);
+    this._tracks = removeElement(this._tracks, id);
   }
 }
