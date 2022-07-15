@@ -9,24 +9,24 @@ import { findElementById, removeElement, validateUUID } from '../utils/helpers';
 export class TrackService {
   private _tracks: Track[] = [];
 
-  create(createTrackDto: CreateTrackDto) {
+  create(createTrackDto: CreateTrackDto): Track {
     const id = uuidv4();
     const track = new Track(id, createTrackDto);
     this._tracks.push(track);
     return track;
   }
 
-  findAll() {
+  findAll(): Track[] {
     return this._tracks;
   }
 
-  findOne(id: string) {
+  findOne(id: string): Track {
     validateUUID(id);
     const { element } = findElementById(this._tracks, id);
     return element;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
+  update(id: string, updateTrackDto: UpdateTrackDto): Track {
     validateUUID(id);
     const { index } = findElementById(this._tracks, id);
     this._tracks[index] = new Track(id, {
@@ -36,7 +36,7 @@ export class TrackService {
     return this._tracks[index];
   }
 
-  remove(id: string) {
+  remove(id: string): void {
     validateUUID(id);
     this._tracks = removeElement(this._tracks, id);
   }
