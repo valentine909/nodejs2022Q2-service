@@ -16,8 +16,9 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { TrackService } from '../track/track.service';
 import { Artist } from './entities/artist.entity';
 import { FavsService } from '../favs/favs.service';
+import { Routes } from '../utils/constants';
 
-@Controller('artist')
+@Controller(Routes.artist)
 export class ArtistController {
   constructor(
     private readonly artistService: ArtistService,

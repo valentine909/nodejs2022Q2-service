@@ -16,8 +16,9 @@ import { ArtistService } from '../artist/artist.service';
 import { validateFavExists } from '../utils/helpers';
 import { Album } from '../album/entities/album.entity';
 import { Artist } from '../artist/entities/artist.entity';
+import { Routes } from '../utils/constants';
 
-@Controller('favs')
+@Controller(Routes.favs)
 export class FavsController {
   constructor(
     private readonly favsService: FavsService,
@@ -51,7 +52,7 @@ export class FavsController {
     return response;
   }
 
-  @Post('track/:id')
+  @Post(`${Routes.track}/:id`)
   @HttpCode(201)
   createTrack(@Param('id') id: string): Track {
     const track = validateFavExists(this.trackService, id) as Track;
@@ -59,13 +60,13 @@ export class FavsController {
     return track;
   }
 
-  @Delete('track/:id')
+  @Delete(`${Routes.track}/:id`)
   @HttpCode(204)
   removeTrack(@Param('id') id: string): void {
     return this.favsService.removeTrack(id);
   }
 
-  @Post('album/:id')
+  @Post(`${Routes.album}/:id`)
   @HttpCode(201)
   createAlbum(@Param('id') id: string): Album {
     const album = validateFavExists(this.albumService, id) as Album;
@@ -73,13 +74,13 @@ export class FavsController {
     return album;
   }
 
-  @Delete('album/:id')
+  @Delete(`${Routes.album}/:id`)
   @HttpCode(204)
   removeAlbum(@Param('id') id: string): void {
     return this.favsService.removeAlbum(id);
   }
 
-  @Post('artist/:id')
+  @Post(`${Routes.artist}/:id`)
   @HttpCode(201)
   createArtist(@Param('id') id: string): Artist {
     const artist = validateFavExists(this.artistService, id) as Artist;
@@ -87,7 +88,7 @@ export class FavsController {
     return artist;
   }
 
-  @Delete('artist/:id')
+  @Delete(`${Routes.artist}/:id`)
   @HttpCode(204)
   removeArtist(@Param('id') id: string): void {
     return this.favsService.removeArtist(id);

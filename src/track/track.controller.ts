@@ -15,8 +15,9 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import { FavsService } from '../favs/favs.service';
+import { Routes } from '../utils/constants';
 
-@Controller('track')
+@Controller(Routes.track)
 export class TrackController {
   constructor(
     private readonly trackService: TrackService,

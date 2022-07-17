@@ -16,8 +16,9 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
 import { TrackService } from '../track/track.service';
 import { FavsService } from '../favs/favs.service';
+import { Routes } from '../utils/constants';
 
-@Controller('album')
+@Controller(Routes.album)
 export class AlbumController {
   constructor(
     private readonly albumService: AlbumService,
