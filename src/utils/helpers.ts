@@ -28,8 +28,16 @@ export const findElementById = (
   throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
 };
 
-export const removeElement = (array: any, id: string): Array<any> | never => {
-  const filteredArray = array.filter((element) => element.id !== id);
+export const simpleFilter = (element, id) => element !== id;
+
+export const idFilter = (element, id) => element.id !== id;
+
+export const removeElement = (
+  array: any,
+  id: string,
+  filterFunc,
+): Array<any> | never => {
+  const filteredArray = array.filter((element) => filterFunc(element, id));
   if (filteredArray.length === array.length) {
     throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
   }
@@ -66,18 +74,7 @@ export const validateFavExists = (
   }
 };
 
-export const removeFavId = (
-  array: string[],
-  id: string,
-): Array<any> | never => {
-  const filteredArray = array.filter((elementId) => elementId !== id);
-  if (filteredArray.length === array.length) {
-    throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
-  }
-  return filteredArray;
-};
-
-export const saveDeleteFromFavs = (
+export const errorControlledDeleteFromFavs = (
   array: any,
   id: string,
   shouldThrowError: boolean,
@@ -85,7 +82,7 @@ export const saveDeleteFromFavs = (
   validateUUID(id);
   let filteredArray;
   try {
-    filteredArray = removeFavId(array, id);
+    filteredArray = removeElement(array, id, simpleFilter);
   } catch (err) {
     if (shouldThrowError) {
       throw err;

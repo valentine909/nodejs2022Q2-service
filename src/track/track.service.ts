@@ -3,7 +3,12 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { findElementById, removeElement, validateUUID } from '../utils/helpers';
+import {
+  findElementById,
+  idFilter,
+  removeElement,
+  validateUUID,
+} from '../utils/helpers';
 
 @Injectable()
 export class TrackService {
@@ -38,6 +43,6 @@ export class TrackService {
 
   remove(id: string): void {
     validateUUID(id);
-    this._tracks = removeElement(this._tracks, id);
+    this._tracks = removeElement(this._tracks, id, idFilter);
   }
 }

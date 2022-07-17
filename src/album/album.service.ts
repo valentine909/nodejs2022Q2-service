@@ -3,7 +3,12 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { findElementById, removeElement, validateUUID } from '../utils/helpers';
+import {
+  findElementById,
+  idFilter,
+  removeElement,
+  validateUUID,
+} from '../utils/helpers';
 
 @Injectable()
 export class AlbumService {
@@ -38,6 +43,6 @@ export class AlbumService {
 
   remove(id: string): void {
     validateUUID(id);
-    this._albums = removeElement(this._albums, id);
+    this._albums = removeElement(this._albums, id, idFilter);
   }
 }

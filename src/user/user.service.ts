@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import {
   findElementById,
+  idFilter,
   removeElement,
   removePassword,
   validatePassword,
@@ -53,6 +54,6 @@ export class UserService {
 
   remove(id: string): void {
     validateUUID(id);
-    this._users = removeElement(this._users, id);
+    this._users = removeElement(this._users, id, idFilter);
   }
 }

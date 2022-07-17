@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { saveDeleteFromFavs } from '../utils/helpers';
+import { errorControlledDeleteFromFavs } from '../utils/helpers';
 import { Favourites } from './entities/favs.entity';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class FavsService {
   }
 
   removeTrack(id: string, shouldThrowError = true) {
-    this._favourites.tracks = saveDeleteFromFavs(
+    this._favourites.tracks = errorControlledDeleteFromFavs(
       this._favourites.tracks,
       id,
       shouldThrowError,
@@ -35,7 +35,7 @@ export class FavsService {
   }
 
   removeAlbum(id: string, shouldThrowError = true) {
-    this._favourites.albums = saveDeleteFromFavs(
+    this._favourites.albums = errorControlledDeleteFromFavs(
       this._favourites.albums,
       id,
       shouldThrowError,
@@ -49,7 +49,7 @@ export class FavsService {
   }
 
   removeArtist(id: string, shouldThrowError = true) {
-    this._favourites.artists = saveDeleteFromFavs(
+    this._favourites.artists = errorControlledDeleteFromFavs(
       this._favourites.artists,
       id,
       shouldThrowError,

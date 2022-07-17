@@ -3,7 +3,12 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
 import { v4 as uuidv4 } from 'uuid';
-import { findElementById, removeElement, validateUUID } from '../utils/helpers';
+import {
+  findElementById,
+  idFilter,
+  removeElement,
+  validateUUID,
+} from '../utils/helpers';
 
 @Injectable()
 export class ArtistService {
@@ -38,6 +43,6 @@ export class ArtistService {
 
   remove(id: string): void {
     validateUUID(id);
-    this._artists = removeElement(this._artists, id);
+    this._artists = removeElement(this._artists, id, idFilter);
   }
 }
