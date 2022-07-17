@@ -7,15 +7,22 @@ import {
   Delete,
   HttpCode,
   Put,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from './entities/track.entity';
+import { FavsService } from '../favs/favs.service';
 
 @Controller('track')
 export class TrackController {
-  constructor(private readonly trackService: TrackService) {}
+  constructor(
+    private readonly trackService: TrackService,
+    @Inject(forwardRef(() => FavsService))
+    private favsService: FavsService,
+  ) {}
 
   @Post()
   @HttpCode(201)
@@ -44,6 +51,8 @@ export class TrackController {
   @Delete(':id')
   @HttpCode(204)
   remove(@Param('id') id: string): void {
-    return this.trackService.remove(id);
+    this.trackService.remove(id);
+    this.favsService.removeTrack(id, false);
+    return;
   }
 }

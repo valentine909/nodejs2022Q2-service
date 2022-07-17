@@ -15,6 +15,7 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
 import { TrackService } from '../track/track.service';
+import { FavsService } from '../favs/favs.service';
 
 @Controller('album')
 export class AlbumController {
@@ -22,6 +23,8 @@ export class AlbumController {
     private readonly albumService: AlbumService,
     @Inject(forwardRef(() => TrackService))
     private trackService: TrackService,
+    @Inject(forwardRef(() => FavsService))
+    private favsService: FavsService,
   ) {}
 
   @Post()
@@ -55,6 +58,7 @@ export class AlbumController {
     this.trackService.findAll().forEach((track) => {
       track.albumId = track.albumId === id ? null : track.albumId;
     });
+    this.favsService.removeAlbum(id, false);
     return;
   }
 }

@@ -15,6 +15,7 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { TrackService } from '../track/track.service';
 import { Artist } from './entities/artist.entity';
+import { FavsService } from '../favs/favs.service';
 
 @Controller('artist')
 export class ArtistController {
@@ -22,6 +23,8 @@ export class ArtistController {
     private readonly artistService: ArtistService,
     @Inject(forwardRef(() => TrackService))
     private trackService: TrackService,
+    @Inject(forwardRef(() => FavsService))
+    private favsService: FavsService,
   ) {}
 
   @Post()
@@ -55,6 +58,7 @@ export class ArtistController {
     this.trackService.findAll().forEach((track) => {
       track.artistId = track.artistId === id ? null : track.artistId;
     });
+    this.favsService.removeArtist(id, false);
     return;
   }
 }
