@@ -22,6 +22,7 @@ services:
       dockerfile: ./db/Dockerfile
     container_name: HLS-db-prod
     restart: unless-stopped
+    command: postgres -c logging_collector=on
     env_file:
       - .env
     environment:
@@ -31,12 +32,14 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
       - POSTGRES_HOST=${POSTGRES_HOST}
     volumes:
-      - postgres_api:/data/db
+      - postgres_api:/var/lib/postgresql/data
+      - postgres_logs:/var/log/postgresql/postgresql.log
     networks:
       - some-network
 
 volumes:
   postgres_api:
+  postgres_logs:
 
 networks:
   some-network:
