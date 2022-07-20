@@ -1,0 +1,11 @@
+**node_modules
+.*
+dist
+db
+Makefile
+Dockerfile*
+nest-cli.json
+test
+README.md
+docker-compose.yml
+docker-compose.development.yml
