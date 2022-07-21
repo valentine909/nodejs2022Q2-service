@@ -1,7 +1,6 @@
 import { validate } from 'uuid';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Messages } from './constants';
-import { User } from '../user/entities/user.entity';
 import { ArtistService } from '../artist/artist.service';
 import { TrackService } from '../track/track.service';
 import { AlbumService } from '../album/album.service';
@@ -42,12 +41,6 @@ export const removeElement = (
     throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
   }
   return filteredArray;
-};
-
-export const removePassword = (user: User) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...rest } = user;
-  return rest;
 };
 
 export const validatePassword = (serverSide, clientSide) => {
