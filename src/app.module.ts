@@ -6,7 +6,7 @@ import { UserModule } from './user/user.module';
 import { FavsModule } from './favs/favs.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import configService from './ormconfig';
+import { configService } from './ormconfig';
 
 @Module({
   imports: [

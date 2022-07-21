@@ -1,4 +1,3 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { CreateTrackDto } from '../dto/create-track.dto';
 
 export class Track {
@@ -10,21 +9,9 @@ export class Track {
     this.duration = dto.duration;
   }
 
-  @IsString()
   id: string;
-
-  @IsString()
-  @IsNotEmpty()
   name: string;
-
-  @IsString()
-  @IsOptional()
   artistId: string | null;
-
-  @IsOptional()
-  @IsString()
   albumId: string | null;
-
-  @IsInt()
   duration: number;
 }

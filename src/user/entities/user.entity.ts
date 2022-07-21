@@ -1,38 +1,37 @@
-import { CreateUserDto } from '../dto/create-user.dto';
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export class User {
-  constructor(
-    id: string,
-    dto: CreateUserDto,
-    version = 1,
-    createdAt = Date.now(),
-  ) {
-    this.id = id;
-    this.login = dto.login;
-    this.password = dto.password;
-    this.version = version;
-    this.createdAt = createdAt;
-    this.updatedAt = Date.now();
-  }
-
-  @IsString()
+@Entity('user')
+export class UserEntity extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Column()
   login: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Column()
   password: string;
 
-  @IsInt()
+  @Column()
   version: number;
 
-  @IsInt()
+  @Column('bigint')
   createdAt: number;
 
-  @IsInt()
+  @Column('bigint')
   updatedAt: number;
+
+  toResponse() {
+    const { id, login, version, createdAt, updatedAt } = this;
+    return {
+      id,
+      login,
+      version,
+      createdAt: UserEntity.bigIntAsStringToInt(createdAt as unknown as string),
+      updatedAt: UserEntity.bigIntAsStringToInt(updatedAt as unknown as string),
+    };
+  }
+
+  private static bigIntAsStringToInt(bigIntString: string) {
+    return parseInt(bigIntString, 10);
+  }
 }
