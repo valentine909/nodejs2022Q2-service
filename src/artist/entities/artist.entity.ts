@@ -1,20 +1,13 @@
-import { CreateArtistDto } from '../dto/create-artist.dto';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export class Artist {
-  constructor(id: string, dto: CreateArtistDto) {
-    this.id = id;
-    this.name = dto.name;
-    this.grammy = dto.grammy;
-  }
-
-  @IsString()
+@Entity()
+export class ArtistEntity extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Column()
   name: string;
 
-  @IsBoolean()
+  @Column()
   grammy: boolean;
 }

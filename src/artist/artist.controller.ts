@@ -9,14 +9,16 @@ import {
   Put,
   forwardRef,
   Inject,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { TrackService } from '../track/track.service';
-import { Artist } from './entities/artist.entity';
 import { FavsService } from '../favs/favs.service';
 import { Routes } from '../utils/constants';
+import { AlbumService } from '../album/album.service';
+import { IArtist } from './interface/artist.interface';
 
 @Controller(Routes.artist)
 export class ArtistController {
@@ -24,41 +26,46 @@ export class ArtistController {
     private readonly artistService: ArtistService,
     @Inject(forwardRef(() => TrackService))
     private trackService: TrackService,
+    @Inject(forwardRef(() => AlbumService))
+    private albumService: AlbumService,
     @Inject(forwardRef(() => FavsService))
     private favsService: FavsService,
   ) {}
 
   @Post()
   @HttpCode(201)
-  create(@Body() createArtistDto: CreateArtistDto): Artist {
+  async create(@Body() createArtistDto: CreateArtistDto): Promise<IArtist> {
     return this.artistService.create(createArtistDto);
   }
 
   @Get()
-  findAll(): Artist[] {
+  async findAll(): Promise<IArtist[]> {
     return this.artistService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Artist {
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<IArtist> {
     return this.artistService.findOne(id);
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: UpdateArtistDto,
-  ): Artist {
+  ): Promise<IArtist> {
     return this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): void {
-    this.artistService.remove(id);
-    this.trackService.findAll().forEach((track) => {
-      track.artistId = track.artistId === id ? null : track.artistId;
-    });
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    await this.artistService.delete(id);
+    await this.trackService.nullArtist(id);
+    await this.albumService.nullArtist(id);
     this.favsService.removeArtist(id, false);
     return;
   }
