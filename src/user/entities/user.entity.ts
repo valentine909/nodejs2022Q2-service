@@ -1,4 +1,5 @@
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BigintTransformer } from './bigint.transformer';
 
 @Entity('user')
 export class UserEntity extends BaseEntity {
@@ -14,10 +15,10 @@ export class UserEntity extends BaseEntity {
   @Column()
   version: number;
 
-  @Column('bigint')
+  @Column('bigint', { transformer: new BigintTransformer() })
   createdAt: number;
 
-  @Column('bigint')
+  @Column('bigint', { transformer: new BigintTransformer() })
   updatedAt: number;
 
   toResponse() {
@@ -26,12 +27,8 @@ export class UserEntity extends BaseEntity {
       id,
       login,
       version,
-      createdAt: UserEntity.bigIntAsStringToInt(createdAt as unknown as string),
-      updatedAt: UserEntity.bigIntAsStringToInt(updatedAt as unknown as string),
+      createdAt,
+      updatedAt,
     };
-  }
-
-  private static bigIntAsStringToInt(bigIntString: string) {
-    return parseInt(bigIntString, 10);
   }
 }
