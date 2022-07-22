@@ -13,7 +13,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Routes } from '../utils/constants';
-import { IUser } from './model/user.model';
+import { IUser } from './interface/user.interface';
 
 @Controller(Routes.user)
 export class UserController {

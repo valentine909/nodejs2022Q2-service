@@ -17,7 +17,7 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { TrackService } from '../track/track.service';
 import { FavsService } from '../favs/favs.service';
 import { Routes } from '../utils/constants';
-import { IAlbum } from './model/album.model';
+import { IAlbum } from './interface/album.interface';
 
 @Controller(Routes.album)
 export class AlbumController {

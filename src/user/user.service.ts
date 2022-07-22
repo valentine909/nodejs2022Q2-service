@@ -5,7 +5,7 @@ import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { validatePassword } from '../utils/helpers';
-import { IUser } from './model/user.model';
+import { IUser } from './interface/user.interface';
 import { Messages } from '../utils/constants';
 
 @Injectable()

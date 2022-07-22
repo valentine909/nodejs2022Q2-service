@@ -16,7 +16,7 @@ import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { FavsService } from '../favs/favs.service';
 import { Routes } from '../utils/constants';
-import { ITrack } from './model/track.model';
+import { ITrack } from './interface/track.interface';
 
 @Controller(Routes.track)
 export class TrackController {
