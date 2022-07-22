@@ -9,14 +9,15 @@ import {
   Put,
   Inject,
   forwardRef,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Album } from './entities/album.entity';
 import { TrackService } from '../track/track.service';
 import { FavsService } from '../favs/favs.service';
 import { Routes } from '../utils/constants';
+import { IAlbum } from './model/album.model';
 
 @Controller(Routes.album)
 export class AlbumController {
@@ -30,35 +31,37 @@ export class AlbumController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createAlbumDto: CreateAlbumDto): Album {
+  async create(@Body() createAlbumDto: CreateAlbumDto): Promise<IAlbum> {
     return this.albumService.create(createAlbumDto);
   }
 
   @Get()
-  findAll(): Album[] {
+  async findAll(): Promise<IAlbum[]> {
     return this.albumService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Album {
-    return this.albumService.findOne(id);
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<IAlbum> {
+    return await this.albumService.findOne(id);
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
-  ): Album {
-    return this.albumService.update(id, updateAlbumDto);
+  ): Promise<IAlbum> {
+    return await this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): void {
-    this.albumService.remove(id);
-    this.trackService.findAll().forEach((track) => {
-      track.albumId = track.albumId === id ? null : track.albumId;
-    });
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    await this.albumService.delete(id);
+    await this.trackService.nullAlbum(id);
     this.favsService.removeAlbum(id, false);
     return;
   }
