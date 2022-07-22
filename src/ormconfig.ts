@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import { DataSourceOptions } from 'typeorm';
+import { UserEntity } from './user/entities/user.entity';
+import { TrackEntity } from './track/entities/track.entity';
 
 export const configService = {
   type: 'postgres',
@@ -9,7 +11,7 @@ export const configService = {
   password: process.env.POSTGRES_PASSWORD as string,
   database: process.env.POSTGRES_DATABASE as string,
   synchronize: true,
-  entities: ['dist/user/entities/user.entity.js'],
+  entities: [UserEntity, TrackEntity],
   migrations: ['src/database/migrations/*.ts'],
   cli: {
     migrationsDir: 'src/database/migrations',
