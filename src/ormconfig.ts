@@ -1,22 +1,33 @@
 import 'dotenv/config';
-import { DataSourceOptions } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import { UserEntity } from './user/entities/user.entity';
 import { TrackEntity } from './track/entities/track.entity';
 import { AlbumEntity } from './album/entities/album.entity';
 import { ArtistEntity } from './artist/entities/artist.entity';
 
-export const configService = {
+export const dataSourceOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST as string,
   port: parseInt(process.env.POSTGRES_PORT as string, 10) as number,
-  username: process.env.POSTGRES_USER as string,
+  username: process.env.POSTGRES_USERNAME as string,
   password: process.env.POSTGRES_PASSWORD as string,
   database: process.env.POSTGRES_DATABASE as string,
   synchronize: true,
   entities: [UserEntity, TrackEntity, AlbumEntity, ArtistEntity],
-  migrations: ['src/database/migrations/*.ts'],
-  cli: {
-    migrationsDir: 'src/database/migrations',
-  },
+  migrations: ['src/migrations/*.ts'],
   migrationsRun: true,
+  migrationsTableName: 'migrations',
 } as DataSourceOptions;
+
+const dataSource = new DataSource(dataSourceOptions);
+
+dataSource
+  .initialize()
+  .then(() => {
+    console.log('Data Source has been initialized!');
+  })
+  .catch((err) => {
+    console.error('Error during Data Source initialization', err);
+  });
+
+export default dataSource;

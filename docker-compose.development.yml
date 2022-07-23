@@ -5,14 +5,14 @@ services:
     build:
       context: .
       target: development
-    container_name: HLS-api-dev
+    container_name: api
+    image: api-dev:latest
     command: npm run start:dev
-    restart: unless-stopped
+    restart: always
     env_file:
       - .env
     ports:
-      - ${EXPOSE}:${PORT}
-      - "4000:4000"
+      - ${PORT}:${PORT}
     volumes:
       - .:/app/
       - /app/node_modules
@@ -24,54 +24,25 @@ services:
   api_db:
     build:
       dockerfile: ./db/Dockerfile
-    container_name: HLS-db-dev
-    restart: unless-stopped
+    container_name: postgres
+    image: my-postgres
+    restart: always
     command: postgres -c logging_collector=on
     env_file:
       - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
       PGDATA: ${PGDATA}
     ports:
-      - ${DB_PORT}:${DB_PORT}
-      - "5430:5430"
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
-      - postgres_api:/var/lib/postgresql/data
-      - postgres_logs:/var/log/postgresql/postgresql.log
+      - ./pgdata:/var/lib/postgresql/data
+      - ./pglog:/var/log/postgresql
     networks:
       - some-network
 
-  pgadmin:
-    container_name: pgadmin_container
-    user: root
-    image: dpage/pgadmin4:5.7
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "user@user.com"
-      PGADMIN_DEFAULT_PASSWORD: "pass"
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    volumes:
-      - ./pgadmin:/var/lib/pgadmin
-    ports:
-      - "5050:80"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1G
-    networks:
-      - postgres
-
-volumes:
-  postgres_api:
-  postgres_logs:
-
 networks:
   some-network:
-    driver: bridge
-  postgres:
     driver: bridge
