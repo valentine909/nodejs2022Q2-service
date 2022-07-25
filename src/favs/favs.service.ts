@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { errorControlledDeleteFromFavs } from '../utils/helpers';
-import { Favourites } from './entities/favs.entity';
+import { IFavs } from './interface/favs.interface';
 
 @Injectable()
 export class FavsService {
-  private readonly _favourites: Favourites = {
+  private readonly _favourites: IFavs = {
     artists: [],
     albums: [],
     tracks: [],
   };
 
-  findAll(): Favourites {
+  findAll(): IFavs {
     return this._favourites;
   }
 

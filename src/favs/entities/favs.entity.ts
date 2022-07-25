@@ -1,12 +1,13 @@
-import { IsArray } from 'class-validator';
+import { Entity, Column, BaseEntity } from 'typeorm';
 
-export class Favourites {
-  @IsArray()
+@Entity()
+export class FavouritesEntity extends BaseEntity {
+  @Column()
   artists: string[];
 
-  @IsArray()
+  @Column()
   albums: string[];
 
-  @IsArray()
+  @Column()
   tracks: string[];
 }

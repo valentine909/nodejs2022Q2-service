@@ -49,12 +49,12 @@ export const validatePassword = (serverSide, clientSide) => {
   }
 };
 
-export const validateFavExists = (
+export const validateFavExists = async (
   service: ArtistService | TrackService | AlbumService,
   id: string,
 ) => {
   try {
-    return service.findOne(id);
+    return await service.findOne(id);
   } catch (e) {
     if (e.status === 404) {
       throw new HttpException(
