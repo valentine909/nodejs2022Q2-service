@@ -49,10 +49,9 @@ export class AlbumService {
 
   async nullArtist(id: string) {
     const albums = await this.findAll();
-    for (const album of albums) {
-      if (album.artistId === id) {
-        await this.update(id, { artistId: null });
-      }
-    }
+    const promisesToProcess = albums
+      .filter((album) => album.artistId === id)
+      .map((album) => this.update(album.id, { artistId: null }));
+    await Promise.all(promisesToProcess);
   }
 }

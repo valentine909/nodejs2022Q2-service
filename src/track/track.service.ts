@@ -49,19 +49,17 @@ export class TrackService {
 
   async nullArtist(id: string): Promise<void> {
     const tracks = await this.findAll();
-    for (const track of tracks) {
-      if (track.artistId === id) {
-        await this.update(id, { artistId: null });
-      }
-    }
+    const promisesToProcess = tracks
+      .filter((track) => track.artistId === id)
+      .map((track) => this.update(track.id, { artistId: null }));
+    await Promise.all(promisesToProcess);
   }
 
   async nullAlbum(id: string): Promise<void> {
     const tracks = await this.findAll();
-    for (const track of tracks) {
-      if (track.albumId === id) {
-        await this.update(id, { albumId: null });
-      }
-    }
+    const promisesToProcess = tracks
+      .filter((track) => track.albumId === id)
+      .map((track) => this.update(track.id, { albumId: null }));
+    await Promise.all(promisesToProcess);
   }
 }
