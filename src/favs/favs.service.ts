@@ -10,15 +10,7 @@ export class FavsService {
   constructor(
     @InjectRepository(FavouritesEntity)
     private favRepository: Repository<FavouritesEntity>,
-  ) {
-    favRepository.findOne({ where: { id: 1 } }).then((favs) => {
-      if (!favs) {
-        favRepository
-          .save({ artists: [], albums: [], tracks: [] })
-          .catch((err) => console.log(err));
-      }
-    });
-  }
+  ) {}
 
   async findAll(): Promise<IFavs> {
     return await this.favRepository.findOne({

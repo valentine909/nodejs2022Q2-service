@@ -7,6 +7,7 @@ import { join, dirname } from 'path';
 import { parse } from 'yaml';
 import { SwaggerModule } from '@nestjs/swagger';
 import { dataSource } from './ormconfig';
+import { FavouritesEntity } from './favs/entities/favs.entity';
 
 const PORT = process.env.PORT || 4000;
 const swaggerDocs = {
@@ -31,9 +32,26 @@ async function bootstrap() {
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
+const seedDB = async () => {
+  const favs = await dataSource.manager.findOne(FavouritesEntity, {
+    where: { id: 1 },
+  });
+  if (!favs) {
+    await dataSource.manager.save(
+      dataSource.manager.create(FavouritesEntity, {
+        artists: [],
+        albums: [],
+        tracks: [],
+      }),
+    );
+  }
+  console.log();
+};
+
 dataSource
   .initialize()
-  .then(() => {
+  .then(async () => {
+    await seedDB();
     bootstrap().catch((err) => console.log(err));
   })
   .catch((err) => {
