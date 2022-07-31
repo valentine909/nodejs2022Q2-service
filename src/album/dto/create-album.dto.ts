@@ -1,4 +1,9 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from '@nestjs/class-validator';
 
 export class CreateAlbumDto {
   @IsString()

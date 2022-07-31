@@ -3,6 +3,7 @@
 ## Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
+- Docker - [Download & Install Docker](https://www.docker.com/products/docker-desktop/).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
 
 ## Downloading
@@ -17,15 +18,39 @@ git clone {repository URL}
 npm install
 ```
 
-## Running application
+## Running dockerized application in development mode
 
 ```
-npm start
+npm run docker-dev
 ```
 
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+After starting the app on port (5000 as default) you can open
+in your browser OpenAPI documentation by typing http://localhost:5000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## Running dockerized application in production mode
+
+```
+npm run docker-prod
+```
+
+After starting the app on port (5000 as default) you can open
+in your browser OpenAPI documentation by typing http://localhost:5000/doc/.
+For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## Test docker image for vulnerability issues
+
+```
+npm run scan
+```
+
+Only production image for api is going to be tested. Image must be previously
+created by running dockerized application in production mode (see above) or by
+running the following command:
+
+```
+npm run build-api-image
+```
 
 ## Testing
 

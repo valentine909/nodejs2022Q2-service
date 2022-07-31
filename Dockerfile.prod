@@ -1,0 +1,25 @@
+FROM node:lts-alpine as ts-compiler
+
+WORKDIR /app
+
+COPY package*.json tsconfig.json tsconfig.build.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+FROM node:lts-alpine as ts-remover
+
+WORKDIR /app
+
+COPY --from=ts-compiler /app/package*.json ./
+
+COPY --from=ts-compiler /app/dist ./dist
+
+COPY --from=ts-compiler /app/doc ./doc
+
+RUN npm install --omit=dev
+
+CMD ["dist/main.js"]
