@@ -4,6 +4,8 @@ import {
   forwardRef,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -13,8 +15,7 @@ import { FavsService } from './favs.service';
 import { TrackService } from '../track/track.service';
 import { AlbumService } from '../album/album.service';
 import { ArtistService } from '../artist/artist.service';
-import { validateFavExists } from '../utils/helpers';
-import { Routes } from '../utils/constants';
+import { Messages, Routes } from '../utils/constants';
 import { ITrack } from '../track/interface/track.interface';
 import { IAlbum } from '../album/interface/album.interface';
 import { IArtist } from '../artist/interface/artist.interface';
@@ -56,7 +57,13 @@ export class FavsController {
   async createTrack(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<ITrack> {
-    const track = (await validateFavExists(this.trackService, id)) as ITrack;
+    const track = await this.trackService.findOne(id);
+    if (!track) {
+      throw new HttpException(
+        Messages.ORIGIN_NOT_FOUND,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
     await this.favsService.addTrack(id);
     return track;
   }
@@ -66,7 +73,11 @@ export class FavsController {
   async removeTrack(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
-    return await this.favsService.removeTrack(id);
+    const response = await this.favsService.removeTrack(id);
+    if (response === null) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return;
   }
 
   @Post(`${Routes.album}/:id`)
@@ -74,7 +85,13 @@ export class FavsController {
   async createAlbum(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<IAlbum> {
-    const album = (await validateFavExists(this.albumService, id)) as IAlbum;
+    const album = await this.albumService.findOne(id);
+    if (!album) {
+      throw new HttpException(
+        Messages.ORIGIN_NOT_FOUND,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
     await this.favsService.addAlbum(id);
     return album;
   }
@@ -84,7 +101,11 @@ export class FavsController {
   async removeAlbum(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
-    return await this.favsService.removeAlbum(id);
+    const response = await this.favsService.removeAlbum(id);
+    if (response === null) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return;
   }
 
   @Post(`${Routes.artist}/:id`)
@@ -92,7 +113,13 @@ export class FavsController {
   async createArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<IArtist> {
-    const artist = (await validateFavExists(this.artistService, id)) as IArtist;
+    const artist = await this.artistService.findOne(id);
+    if (!artist) {
+      throw new HttpException(
+        Messages.ORIGIN_NOT_FOUND,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
     await this.favsService.addArtist(id);
     return artist;
   }
@@ -102,6 +129,10 @@ export class FavsController {
   async removeArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
-    return await this.favsService.removeArtist(id);
+    const response = await this.favsService.removeArtist(id);
+    if (response === null) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return;
   }
 }

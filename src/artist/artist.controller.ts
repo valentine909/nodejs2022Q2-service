@@ -10,13 +10,15 @@ import {
   forwardRef,
   Inject,
   ParseUUIDPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { TrackService } from '../track/track.service';
 import { FavsService } from '../favs/favs.service';
-import { Routes } from '../utils/constants';
+import { Messages, Routes } from '../utils/constants';
 import { AlbumService } from '../album/album.service';
 import { IArtist } from './interface/artist.interface';
 
@@ -47,7 +49,11 @@ export class ArtistController {
   async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<IArtist> {
-    return await this.artistService.findOne(id);
+    const artist = await this.artistService.findOne(id);
+    if (!artist) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return artist;
   }
 
   @Put(':id')
@@ -55,7 +61,11 @@ export class ArtistController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: UpdateArtistDto,
   ): Promise<IArtist> {
-    return await this.artistService.update(id, updateArtistDto);
+    const artist = await this.artistService.update(id, updateArtistDto);
+    if (!artist) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return artist;
   }
 
   @Delete(':id')
@@ -63,11 +73,14 @@ export class ArtistController {
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
+    const response = await this.artistService.delete(id);
+    if (response === 0) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
     await Promise.all([
-      this.favsService.removeArtist(id, false),
+      this.favsService.removeArtist(id),
       this.trackService.nullArtist(id),
       this.albumService.nullArtist(id),
-      this.artistService.delete(id),
     ]);
     return;
   }

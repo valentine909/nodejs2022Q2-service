@@ -3,7 +3,6 @@ import { IFavs } from './interface/favs.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FavouritesEntity } from './entities/favs.entity';
-import { removeElement } from '../utils/helpers';
 
 @Injectable()
 export class FavsService {
@@ -26,9 +25,13 @@ export class FavsService {
     }
   }
 
-  async removeTrack(id: string, throwError = true) {
+  async removeTrack(id: string) {
     const favs = await this.findAll();
-    favs.tracks = removeElement(favs.tracks, id, throwError);
+    const filteredArray = favs.tracks.filter((trackId) => trackId !== id);
+    if (filteredArray.length === favs.tracks.length) {
+      return null;
+    }
+    favs.tracks = filteredArray;
     await this.favRepository.save(favs);
   }
 
@@ -40,9 +43,13 @@ export class FavsService {
     await this.favRepository.save(favs);
   }
 
-  async removeAlbum(id: string, throwError = true) {
+  async removeAlbum(id: string) {
     const favs = await this.findAll();
-    favs.albums = removeElement(favs.albums, id, throwError);
+    const filteredArray = favs.albums.filter((albumId) => albumId !== id);
+    if (filteredArray.length === favs.albums.length) {
+      return null;
+    }
+    favs.albums = filteredArray;
     await this.favRepository.save(favs);
   }
 
@@ -54,9 +61,13 @@ export class FavsService {
     await this.favRepository.save(favs);
   }
 
-  async removeArtist(id: string, throwError = true) {
+  async removeArtist(id: string) {
     const favs = await this.findAll();
-    favs.artists = removeElement(favs.artists, id, throwError);
+    const filteredArray = favs.artists.filter((artistId) => artistId !== id);
+    if (filteredArray.length === favs.artists.length) {
+      return null;
+    }
+    favs.artists = filteredArray;
     await this.favRepository.save(favs);
   }
 }

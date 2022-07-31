@@ -1,11 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { TrackEntity } from './entities/track.entity';
 import { ITrack } from './interface/track.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Messages } from '../utils/constants';
 
 @Injectable()
 export class TrackService {
@@ -24,26 +23,22 @@ export class TrackService {
   }
 
   async findOne(id: string): Promise<ITrack> {
-    const track = await this.trackRepository.findOne({ where: { id } });
-    if (track) {
-      return track;
-    }
-    throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    return await this.trackRepository.findOne({ where: { id } });
   }
 
   async update(id: string, updateTrackDto: UpdateTrackDto): Promise<ITrack> {
     const track = await this.trackRepository.findOne({ where: { id } });
     if (!track) {
-      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+      return track;
     }
     const updatedTrack = Object.assign(track, updateTrackDto);
     return await this.trackRepository.save(updatedTrack);
   }
 
-  async delete(id: string): Promise<void> {
-    const result = await this.trackRepository.delete(id);
-    if (result.affected === 0) {
-      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+  async delete(id: string): Promise<number> {
+    const { affected } = await this.trackRepository.delete(id);
+    if (affected === 0) {
+      return affected;
     }
   }
 
