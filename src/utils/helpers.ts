@@ -4,22 +4,6 @@ import { ArtistService } from '../artist/artist.service';
 import { TrackService } from '../track/track.service';
 import { AlbumService } from '../album/album.service';
 
-export const simpleFilter = (element, id) => element !== id;
-
-export const idFilter = (element, id) => element.id !== id;
-
-export const removeElement = (
-  array: any,
-  id: string,
-  filterFunc,
-): Array<any> | never => {
-  const filteredArray = array.filter((element) => filterFunc(element, id));
-  if (filteredArray.length === array.length) {
-    throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
-  }
-  return filteredArray;
-};
-
 export const validatePassword = (serverSide, clientSide) => {
   if (serverSide !== clientSide) {
     throw new HttpException(Messages.WRONG_PASSWORD, HttpStatus.FORBIDDEN);
@@ -44,18 +28,14 @@ export const validateFavExists = async (
   }
 };
 
-export const errorControlledDeleteFromFavs = (
+export const removeElement = (
   array: any,
   id: string,
-  shouldThrowError: boolean,
-) => {
-  let filteredArray;
-  try {
-    filteredArray = removeElement(array, id, simpleFilter);
-  } catch (err) {
-    if (shouldThrowError) {
-      throw err;
-    }
+  throwError: boolean,
+): Array<any> | never => {
+  const filteredArray = array.filter((element) => element !== id);
+  if (filteredArray.length === array.length && throwError) {
+    throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
   }
-  return filteredArray ? filteredArray : array;
+  return filteredArray;
 };

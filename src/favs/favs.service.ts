@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { errorControlledDeleteFromFavs } from '../utils/helpers';
 import { IFavs } from './interface/favs.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FavouritesEntity } from './entities/favs.entity';
+import { removeElement } from '../utils/helpers';
 
 @Injectable()
 export class FavsService {
@@ -34,13 +34,9 @@ export class FavsService {
     }
   }
 
-  async removeTrack(id: string, shouldThrowError = true) {
+  async removeTrack(id: string, throwError = true) {
     const favs = await this.findAll();
-    favs.tracks = errorControlledDeleteFromFavs(
-      favs.tracks,
-      id,
-      shouldThrowError,
-    );
+    favs.tracks = removeElement(favs.tracks, id, throwError);
     await this.favRepository.save(favs);
   }
 
@@ -52,13 +48,9 @@ export class FavsService {
     await this.favRepository.save(favs);
   }
 
-  async removeAlbum(id: string, shouldThrowError = true) {
+  async removeAlbum(id: string, throwError = true) {
     const favs = await this.findAll();
-    favs.albums = errorControlledDeleteFromFavs(
-      favs.albums,
-      id,
-      shouldThrowError,
-    );
+    favs.albums = removeElement(favs.albums, id, throwError);
     await this.favRepository.save(favs);
   }
 
@@ -70,13 +62,9 @@ export class FavsService {
     await this.favRepository.save(favs);
   }
 
-  async removeArtist(id: string, shouldThrowError = true) {
+  async removeArtist(id: string, throwError = true) {
     const favs = await this.findAll();
-    favs.artists = errorControlledDeleteFromFavs(
-      favs.artists,
-      id,
-      shouldThrowError,
-    );
+    favs.artists = removeElement(favs.artists, id, throwError);
     await this.favRepository.save(favs);
   }
 }
