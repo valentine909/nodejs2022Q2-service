@@ -6,6 +6,7 @@ import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { parse } from 'yaml';
 import { SwaggerModule } from '@nestjs/swagger';
+import { dataSource } from './ormconfig';
 
 const PORT = process.env.PORT || 4000;
 const swaggerDocs = {
@@ -30,4 +31,11 @@ async function bootstrap() {
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
-bootstrap();
+dataSource
+  .initialize()
+  .then(() => {
+    bootstrap().catch((err) => console.log(err));
+  })
+  .catch((err) => {
+    console.error('Error during Data Source initialization', err);
+  });
