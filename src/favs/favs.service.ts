@@ -1,58 +1,82 @@
 import { Injectable } from '@nestjs/common';
 import { errorControlledDeleteFromFavs } from '../utils/helpers';
 import { IFavs } from './interface/favs.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { FavouritesEntity } from './entities/favs.entity';
 
 @Injectable()
 export class FavsService {
-  private readonly _favourites: IFavs = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
-
-  findAll(): IFavs {
-    return this._favourites;
+  constructor(
+    @InjectRepository(FavouritesEntity)
+    private favRepository: Repository<FavouritesEntity>,
+  ) {
+    favRepository.findOne({ where: { id: 1 } }).then((favs) => {
+      if (!favs) {
+        favRepository
+          .save({ artists: [], albums: [], tracks: [] })
+          .catch((err) => console.log(err));
+      }
+    });
   }
 
-  addTrack(id: string) {
-    if (!this._favourites.tracks.includes(id)) {
-      this._favourites.tracks.push(id);
+  async findAll(): Promise<IFavs> {
+    return await this.favRepository.findOne({
+      where: { id: 1 },
+    });
+  }
+
+  async addTrack(id: string) {
+    const favs = await this.findAll();
+    if (!favs.tracks.includes(id)) {
+      favs.tracks.push(id);
+      await this.favRepository.save(favs);
     }
   }
 
-  removeTrack(id: string, shouldThrowError = true) {
-    this._favourites.tracks = errorControlledDeleteFromFavs(
-      this._favourites.tracks,
+  async removeTrack(id: string, shouldThrowError = true) {
+    const favs = await this.findAll();
+    favs.tracks = errorControlledDeleteFromFavs(
+      favs.tracks,
       id,
       shouldThrowError,
     );
+    await this.favRepository.save(favs);
   }
 
-  addAlbum(id: string) {
-    if (!this._favourites.albums.includes(id)) {
-      this._favourites.albums.push(id);
+  async addAlbum(id: string) {
+    const favs = await this.findAll();
+    if (!favs.albums.includes(id)) {
+      favs.albums.push(id);
     }
+    await this.favRepository.save(favs);
   }
 
-  removeAlbum(id: string, shouldThrowError = true) {
-    this._favourites.albums = errorControlledDeleteFromFavs(
-      this._favourites.albums,
+  async removeAlbum(id: string, shouldThrowError = true) {
+    const favs = await this.findAll();
+    favs.albums = errorControlledDeleteFromFavs(
+      favs.albums,
       id,
       shouldThrowError,
     );
+    await this.favRepository.save(favs);
   }
 
-  addArtist(id: string) {
-    if (!this._favourites.artists.includes(id)) {
-      this._favourites.artists.push(id);
+  async addArtist(id: string) {
+    const favs = await this.findAll();
+    if (!favs.artists.includes(id)) {
+      favs.artists.push(id);
     }
+    await this.favRepository.save(favs);
   }
 
-  removeArtist(id: string, shouldThrowError = true) {
-    this._favourites.artists = errorControlledDeleteFromFavs(
-      this._favourites.artists,
+  async removeArtist(id: string, shouldThrowError = true) {
+    const favs = await this.findAll();
+    favs.artists = errorControlledDeleteFromFavs(
+      favs.artists,
       id,
       shouldThrowError,
     );
+    await this.favRepository.save(favs);
   }
 }

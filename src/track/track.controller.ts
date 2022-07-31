@@ -58,7 +58,7 @@ export class TrackController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
     await this.trackService.delete(id);
-    this.favsService.removeTrack(id, false);
+    await this.favsService.removeTrack(id, false);
     return;
   }
 }

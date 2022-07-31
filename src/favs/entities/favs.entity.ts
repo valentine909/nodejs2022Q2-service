@@ -1,13 +1,16 @@
-import { Entity, Column, BaseEntity } from 'typeorm';
+import { Entity, Column, BaseEntity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class FavouritesEntity extends BaseEntity {
-  @Column()
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column('varchar', { array: true })
   artists: string[];
 
-  @Column()
+  @Column('varchar', { array: true })
   albums: string[];
 
-  @Column()
+  @Column('varchar', { array: true })
   tracks: string[];
 }

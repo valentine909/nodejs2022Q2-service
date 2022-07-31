@@ -62,7 +62,7 @@ export class AlbumController {
   ): Promise<void> {
     await this.albumService.delete(id);
     await this.trackService.nullAlbum(id);
-    this.favsService.removeAlbum(id, false);
+    await this.favsService.removeAlbum(id, false);
     return;
   }
 }

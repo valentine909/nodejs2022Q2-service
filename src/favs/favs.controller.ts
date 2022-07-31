@@ -1,13 +1,13 @@
 import {
   Controller,
-  Get,
-  Post,
-  Param,
   Delete,
+  forwardRef,
+  Get,
   HttpCode,
   Inject,
-  forwardRef,
+  Param,
   ParseUUIDPipe,
+  Post,
 } from '@nestjs/common';
 import { FavsService } from './favs.service';
 import { TrackService } from '../track/track.service';
@@ -32,24 +32,23 @@ export class FavsController {
   ) {}
 
   @Get()
-  findAll() {
-    const favs = this.favsService.findAll();
-    type keys = keyof typeof favs;
+  async findAll() {
+    const { albums, artists, tracks } = await this.favsService.findAll();
+    const favs = { albums, artists, tracks };
     const response = {
       artists: [],
       albums: [],
       tracks: [],
     };
-    const services = {
-      artists: this.artistService,
-      albums: this.albumService,
-      tracks: this.trackService,
-    };
-    Object.keys(favs).map((entity: keys) => {
-      favs[entity].map((id) => {
-        response[entity].push(services[entity].findOne(id));
-      });
-    });
+    response.albums = await Promise.all(
+      favs.albums.map((id) => this.albumService.findOne(id)),
+    );
+    response.artists = await Promise.all(
+      favs.artists.map((id) => this.artistService.findOne(id)),
+    );
+    response.tracks = await Promise.all(
+      favs.tracks.map((id) => this.trackService.findOne(id)),
+    );
     return response;
   }
 
@@ -59,16 +58,16 @@ export class FavsController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<ITrack> {
     const track = (await validateFavExists(this.trackService, id)) as ITrack;
-    this.favsService.addTrack(id);
+    await this.favsService.addTrack(id);
     return track;
   }
 
   @Delete(`${Routes.track}/:id`)
   @HttpCode(204)
-  removeTrack(
+  async removeTrack(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): void {
-    return this.favsService.removeTrack(id);
+  ): Promise<void> {
+    return await this.favsService.removeTrack(id);
   }
 
   @Post(`${Routes.album}/:id`)
@@ -77,16 +76,16 @@ export class FavsController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<IAlbum> {
     const album = (await validateFavExists(this.albumService, id)) as IAlbum;
-    this.favsService.addAlbum(id);
+    await this.favsService.addAlbum(id);
     return album;
   }
 
   @Delete(`${Routes.album}/:id`)
   @HttpCode(204)
-  removeAlbum(
+  async removeAlbum(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): void {
-    return this.favsService.removeAlbum(id);
+  ): Promise<void> {
+    return await this.favsService.removeAlbum(id);
   }
 
   @Post(`${Routes.artist}/:id`)
@@ -95,15 +94,15 @@ export class FavsController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<IArtist> {
     const artist = (await validateFavExists(this.artistService, id)) as IArtist;
-    this.favsService.addArtist(id);
+    await this.favsService.addArtist(id);
     return artist;
   }
 
   @Delete(`${Routes.artist}/:id`)
   @HttpCode(204)
-  removeArtist(
+  async removeArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): void {
-    return this.favsService.removeArtist(id);
+  ): Promise<void> {
+    return await this.favsService.removeArtist(id);
   }
 }

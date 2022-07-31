@@ -66,7 +66,7 @@ export class ArtistController {
     await this.artistService.delete(id);
     await this.trackService.nullArtist(id);
     await this.albumService.nullArtist(id);
-    this.favsService.removeArtist(id, false);
+    await this.favsService.removeArtist(id, false);
     return;
   }
 }
