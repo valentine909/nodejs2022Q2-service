@@ -28,28 +28,28 @@ export class TrackController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createTrackDto: CreateTrackDto): Promise<ITrack> {
-    return this.trackService.create(createTrackDto);
+  async create(@Body() createTrackDto: CreateTrackDto): Promise<ITrack> {
+    return await this.trackService.create(createTrackDto);
   }
 
   @Get()
-  findAll(): Promise<ITrack[]> {
-    return this.trackService.findAll();
+  async findAll(): Promise<ITrack[]> {
+    return await this.trackService.findAll();
   }
 
   @Get(':id')
-  findOne(
+  async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<ITrack> {
-    return this.trackService.findOne(id);
+    return await this.trackService.findOne(id);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateTrackDto: UpdateTrackDto,
   ): Promise<ITrack> {
-    return this.trackService.update(id, updateTrackDto);
+    return await this.trackService.update(id, updateTrackDto);
   }
 
   @Delete(':id')
@@ -57,8 +57,10 @@ export class TrackController {
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
-    await this.trackService.delete(id);
-    await this.favsService.removeTrack(id, false);
+    await Promise.all([
+      this.trackService.delete(id),
+      this.favsService.removeTrack(id, false),
+    ]);
     return;
   }
 }

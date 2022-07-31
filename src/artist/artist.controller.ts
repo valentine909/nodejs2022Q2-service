@@ -35,19 +35,19 @@ export class ArtistController {
   @Post()
   @HttpCode(201)
   async create(@Body() createArtistDto: CreateArtistDto): Promise<IArtist> {
-    return this.artistService.create(createArtistDto);
+    return await this.artistService.create(createArtistDto);
   }
 
   @Get()
   async findAll(): Promise<IArtist[]> {
-    return this.artistService.findAll();
+    return await this.artistService.findAll();
   }
 
   @Get(':id')
   async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<IArtist> {
-    return this.artistService.findOne(id);
+    return await this.artistService.findOne(id);
   }
 
   @Put(':id')
@@ -55,7 +55,7 @@ export class ArtistController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateArtistDto: UpdateArtistDto,
   ): Promise<IArtist> {
-    return this.artistService.update(id, updateArtistDto);
+    return await this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')
@@ -63,10 +63,12 @@ export class ArtistController {
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
-    await this.artistService.delete(id);
-    await this.trackService.nullArtist(id);
-    await this.albumService.nullArtist(id);
-    await this.favsService.removeArtist(id, false);
+    await Promise.all([
+      this.favsService.removeArtist(id, false),
+      this.trackService.nullArtist(id),
+      this.albumService.nullArtist(id),
+      this.artistService.delete(id),
+    ]);
     return;
   }
 }

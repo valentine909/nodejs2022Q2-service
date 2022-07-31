@@ -32,12 +32,12 @@ export class AlbumController {
   @Post()
   @HttpCode(201)
   async create(@Body() createAlbumDto: CreateAlbumDto): Promise<IAlbum> {
-    return this.albumService.create(createAlbumDto);
+    return await this.albumService.create(createAlbumDto);
   }
 
   @Get()
   async findAll(): Promise<IAlbum[]> {
-    return this.albumService.findAll();
+    return await this.albumService.findAll();
   }
 
   @Get(':id')
@@ -60,9 +60,11 @@ export class AlbumController {
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<void> {
-    await this.albumService.delete(id);
-    await this.trackService.nullAlbum(id);
-    await this.favsService.removeAlbum(id, false);
+    await Promise.all([
+      this.favsService.removeAlbum(id, false),
+      this.trackService.nullAlbum(id),
+      this.albumService.delete(id),
+    ]);
     return;
   }
 }
