@@ -9,13 +9,16 @@ import {
   Put,
   Inject,
   forwardRef,
+  ParseUUIDPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Track } from './entities/track.entity';
 import { FavsService } from '../favs/favs.service';
-import { Routes } from '../utils/constants';
+import { Messages, Routes } from '../utils/constants';
+import { ITrack } from './interface/track.interface';
 
 @Controller(Routes.track)
 export class TrackController {
@@ -27,33 +30,48 @@ export class TrackController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createTrackDto: CreateTrackDto): Track {
-    return this.trackService.create(createTrackDto);
+  async create(@Body() createTrackDto: CreateTrackDto): Promise<ITrack> {
+    return await this.trackService.create(createTrackDto);
   }
 
   @Get()
-  findAll(): Track[] {
-    return this.trackService.findAll();
+  async findAll(): Promise<ITrack[]> {
+    return await this.trackService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Track {
-    return this.trackService.findOne(id);
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<ITrack> {
+    const track = await this.trackService.findOne(id);
+    if (!track) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return track;
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateTrackDto: UpdateTrackDto,
-  ): Track {
-    return this.trackService.update(id, updateTrackDto);
+  ): Promise<ITrack> {
+    const track = await this.trackService.update(id, updateTrackDto);
+    if (!track) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return track;
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): void {
-    this.trackService.remove(id);
-    this.favsService.removeTrack(id, false);
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    const response = await this.trackService.delete(id);
+    if (response === 0) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    await this.favsService.removeTrack(id);
     return;
   }
 }

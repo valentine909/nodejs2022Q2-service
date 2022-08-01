@@ -1,48 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Album } from './entities/album.entity';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  findElementById,
-  idFilter,
-  removeElement,
-  validateUUID,
-} from '../utils/helpers';
+import { AlbumEntity } from './entities/album.entity';
+import { IAlbum } from './interface/album.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
-  private _albums: Album[] = [];
+  constructor(
+    @InjectRepository(AlbumEntity)
+    private albumRepository: Repository<AlbumEntity>,
+  ) {}
 
-  create(createAlbumDto: CreateAlbumDto): Album {
-    const id = uuidv4();
-    const album = new Album(id, createAlbumDto);
-    this._albums.push(album);
-    return album;
+  async create(createAlbumDto: CreateAlbumDto): Promise<IAlbum> {
+    const album = this.albumRepository.create(createAlbumDto);
+    return await this.albumRepository.save(album);
   }
 
-  findAll(): Album[] {
-    return this._albums;
+  async findAll(): Promise<IAlbum[]> {
+    return await this.albumRepository.find();
   }
 
-  findOne(id: string): Album {
-    validateUUID(id);
-    const { element } = findElementById(this._albums, id);
-    return element;
+  async findOne(id: string): Promise<IAlbum> {
+    return await this.albumRepository.findOne({ where: { id } });
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto): Album {
-    validateUUID(id);
-    const { index } = findElementById(this._albums, id);
-    this._albums[index] = new Album(id, {
-      ...this._albums[index],
-      ...updateAlbumDto,
-    });
-    return this._albums[index];
+  async update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<IAlbum> {
+    const album = await this.albumRepository.findOne({ where: { id } });
+    if (!album) {
+      return;
+    }
+    const updatedAlbum = Object.assign(album, updateAlbumDto);
+    return await this.albumRepository.save(updatedAlbum);
   }
 
-  remove(id: string): void {
-    validateUUID(id);
-    this._albums = removeElement(this._albums, id, idFilter);
+  async delete(id: string): Promise<number> {
+    const { affected } = await this.albumRepository.delete(id);
+    return affected;
+  }
+
+  async nullArtist(id: string) {
+    const albums = await this.findAll();
+    const promisesToProcess = albums
+      .filter((album) => album.artistId === id)
+      .map((album) => this.update(album.id, { artistId: null }));
+    await Promise.all(promisesToProcess);
   }
 }

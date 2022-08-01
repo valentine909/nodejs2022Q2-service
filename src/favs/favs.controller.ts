@@ -1,22 +1,24 @@
 import {
   Controller,
-  Get,
-  Post,
-  Param,
   Delete,
-  HttpCode,
-  Inject,
   forwardRef,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Param,
+  ParseUUIDPipe,
+  Post,
 } from '@nestjs/common';
 import { FavsService } from './favs.service';
 import { TrackService } from '../track/track.service';
-import { Track } from '../track/entities/track.entity';
 import { AlbumService } from '../album/album.service';
 import { ArtistService } from '../artist/artist.service';
-import { validateFavExists } from '../utils/helpers';
-import { Album } from '../album/entities/album.entity';
-import { Artist } from '../artist/entities/artist.entity';
-import { Routes } from '../utils/constants';
+import { Messages, Routes } from '../utils/constants';
+import { ITrack } from '../track/interface/track.interface';
+import { IAlbum } from '../album/interface/album.interface';
+import { IArtist } from '../artist/interface/artist.interface';
 
 @Controller(Routes.favs)
 export class FavsController {
@@ -31,66 +33,106 @@ export class FavsController {
   ) {}
 
   @Get()
-  findAll() {
-    const favs = this.favsService.findAll();
-    type keys = keyof typeof favs;
+  async findAll() {
+    const favs = await this.favsService.findAll();
     const response = {
       artists: [],
       albums: [],
       tracks: [],
     };
-    const services = {
-      artists: this.artistService,
-      albums: this.albumService,
-      tracks: this.trackService,
-    };
-    Object.keys(favs).map((entity: keys) => {
-      favs[entity].map((id) => {
-        response[entity].push(services[entity].findOne(id));
-      });
-    });
+    response.albums = await Promise.all(
+      favs.albums.map((id) => this.albumService.findOne(id)),
+    );
+    response.artists = await Promise.all(
+      favs.artists.map((id) => this.artistService.findOne(id)),
+    );
+    response.tracks = await Promise.all(
+      favs.tracks.map((id) => this.trackService.findOne(id)),
+    );
     return response;
   }
 
   @Post(`${Routes.track}/:id`)
   @HttpCode(201)
-  createTrack(@Param('id') id: string): Track {
-    const track = validateFavExists(this.trackService, id) as Track;
-    this.favsService.addTrack(id);
+  async createTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<ITrack> {
+    const track = await this.trackService.findOne(id);
+    if (!track) {
+      throw new HttpException(
+        Messages.ORIGIN_NOT_FOUND,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    await this.favsService.addTrack(id);
     return track;
   }
 
   @Delete(`${Routes.track}/:id`)
   @HttpCode(204)
-  removeTrack(@Param('id') id: string): void {
-    return this.favsService.removeTrack(id);
+  async removeTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    const response = await this.favsService.removeTrack(id);
+    if (response === null) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return;
   }
 
   @Post(`${Routes.album}/:id`)
   @HttpCode(201)
-  createAlbum(@Param('id') id: string): Album {
-    const album = validateFavExists(this.albumService, id) as Album;
-    this.favsService.addAlbum(id);
+  async createAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<IAlbum> {
+    const album = await this.albumService.findOne(id);
+    if (!album) {
+      throw new HttpException(
+        Messages.ORIGIN_NOT_FOUND,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    await this.favsService.addAlbum(id);
     return album;
   }
 
   @Delete(`${Routes.album}/:id`)
   @HttpCode(204)
-  removeAlbum(@Param('id') id: string): void {
-    return this.favsService.removeAlbum(id);
+  async removeAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    const response = await this.favsService.removeAlbum(id);
+    if (response === null) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return;
   }
 
   @Post(`${Routes.artist}/:id`)
   @HttpCode(201)
-  createArtist(@Param('id') id: string): Artist {
-    const artist = validateFavExists(this.artistService, id) as Artist;
-    this.favsService.addArtist(id);
+  async createArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<IArtist> {
+    const artist = await this.artistService.findOne(id);
+    if (!artist) {
+      throw new HttpException(
+        Messages.ORIGIN_NOT_FOUND,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    await this.favsService.addArtist(id);
     return artist;
   }
 
   @Delete(`${Routes.artist}/:id`)
   @HttpCode(204)
-  removeArtist(@Param('id') id: string): void {
-    return this.favsService.removeArtist(id);
+  async removeArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    const response = await this.favsService.removeArtist(id);
+    if (response === null) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return;
   }
 }

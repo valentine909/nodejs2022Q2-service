@@ -1,30 +1,19 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { CreateTrackDto } from '../dto/create-track.dto';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export class Track {
-  constructor(id: string, dto: CreateTrackDto) {
-    this.id = id;
-    this.name = dto.name;
-    this.albumId = dto.albumId || null;
-    this.artistId = dto.artistId || null;
-    this.duration = dto.duration;
-  }
-
-  @IsString()
+@Entity()
+export class TrackEntity extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @Column()
   name: string;
 
-  @IsString()
-  @IsOptional()
+  @Column({ nullable: true })
   artistId: string | null;
 
-  @IsOptional()
-  @IsString()
+  @Column({ nullable: true })
   albumId: string | null;
 
-  @IsInt()
+  @Column()
   duration: number;
 }

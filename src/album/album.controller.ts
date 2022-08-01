@@ -9,14 +9,17 @@ import {
   Put,
   Inject,
   forwardRef,
+  ParseUUIDPipe,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Album } from './entities/album.entity';
 import { TrackService } from '../track/track.service';
 import { FavsService } from '../favs/favs.service';
-import { Routes } from '../utils/constants';
+import { Messages, Routes } from '../utils/constants';
+import { IAlbum } from './interface/album.interface';
 
 @Controller(Routes.album)
 export class AlbumController {
@@ -30,36 +33,52 @@ export class AlbumController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createAlbumDto: CreateAlbumDto): Album {
-    return this.albumService.create(createAlbumDto);
+  async create(@Body() createAlbumDto: CreateAlbumDto): Promise<IAlbum> {
+    return await this.albumService.create(createAlbumDto);
   }
 
   @Get()
-  findAll(): Album[] {
-    return this.albumService.findAll();
+  async findAll(): Promise<IAlbum[]> {
+    return await this.albumService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Album {
-    return this.albumService.findOne(id);
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<IAlbum> {
+    const album = await this.albumService.findOne(id);
+    if (!album) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return album;
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
-  ): Album {
-    return this.albumService.update(id, updateAlbumDto);
+  ): Promise<IAlbum> {
+    const album = await this.albumService.update(id, updateAlbumDto);
+    if (!album) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return album;
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): void {
-    this.albumService.remove(id);
-    this.trackService.findAll().forEach((track) => {
-      track.albumId = track.albumId === id ? null : track.albumId;
-    });
-    this.favsService.removeAlbum(id, false);
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    const response = await this.albumService.delete(id);
+    if (response === 0) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    } else {
+      await Promise.all([
+        this.favsService.removeAlbum(id),
+        this.trackService.nullAlbum(id),
+      ]);
+    }
     return;
   }
 }

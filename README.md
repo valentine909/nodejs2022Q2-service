@@ -1,4 +1,4 @@
-# Home Library Service. Part I
+# Home Library Service. Part II
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/valentine909/nodejs2022Q2-service.git
 ```
 
 ## Installing NPM modules
@@ -18,38 +18,44 @@ git clone {repository URL}
 npm install
 ```
 
-## Running dockerized application in development mode
+## Running dockerized application
 
 ```
 npm run docker-dev
 ```
 
-After starting the app on port (5000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:5000/doc/.
+After starting the app on port (5000 as default) you can open OpenAPI documentation
+in your browser by typing http://localhost:5000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
-## Running dockerized application in production mode
-
+## Applying migrations
+Build the app:
 ```
-npm run docker-prod
+npm run build
 ```
+When docker container is running (see previous step), get the ID of api-dev:latest container:
+```
+docker ps
+```
+Open shell inside api-dev:latest container:
+```
+docker exec -it 484d8cd69a91 /bin/sh
+```
+NB! Insert your ID instead of 484d8cd69a91
 
-After starting the app on port (5000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:5000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+Apply migration:
+```
+npm run migration:up
+```
+Exit from container's terminal:
+```
+exit
+```
 
 ## Test docker image for vulnerability issues
 
 ```
 npm run scan
-```
-
-Only production image for api is going to be tested. Image must be previously
-created by running dockerized application in production mode (see above) or by
-running the following command:
-
-```
-npm run build-api-image
 ```
 
 ## Testing

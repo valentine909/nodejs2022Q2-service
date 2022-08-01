@@ -5,14 +5,14 @@ services:
     build:
       context: .
       target: development
-    container_name: HLS-api-dev
+    container_name: api
+    image: api-dev:latest
     command: npm run start:dev
-    restart: unless-stopped
+    restart: always
     env_file:
       - .env
     ports:
-      - "${EXPOSE}:${PORT}"
-      - "5000:5000"
+      - ${PORT}:${PORT}
     volumes:
       - .:/app/
       - /app/node_modules
@@ -24,23 +24,24 @@ services:
   api_db:
     build:
       dockerfile: ./db/Dockerfile
-    container_name: HLS-db-dev
-    restart: unless-stopped
+    container_name: postgres
+    image: my-postgres
+    restart: always
+    command: postgres -c logging_collector=on
     env_file:
       - .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DATABASE=${POSTGRES_DATABASE}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_HOST=${POSTGRES_HOST}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      PGDATA: ${PGDATA}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
-      - postgres_api:/data/db
+      - ./pgdata:/var/lib/postgresql/data
+      - ./pglog:/var/log/postgresql
     networks:
       - some-network
-
-volumes:
-  postgres_api:
 
 networks:
   some-network:

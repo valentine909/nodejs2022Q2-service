@@ -1,59 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  findElementById,
-  idFilter,
-  removeElement,
-  removePassword,
-  validatePassword,
-  validateUUID,
-} from '../utils/helpers';
+import { UserEntity } from './entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { validatePassword } from '../utils/helpers';
+import { IUser } from './interface/user.interface';
+import { Messages } from '../utils/constants';
 
 @Injectable()
 export class UserService {
-  private _users: User[] = [];
+  constructor(
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+  ) {}
 
-  create(createUserDto: CreateUserDto): Omit<User, 'password'> {
-    const id = uuidv4();
-    const user = new User(id, createUserDto);
-    this._users.push(user);
-    return removePassword(user);
+  async create(createUserDto: CreateUserDto): Promise<Omit<IUser, 'password'>> {
+    const user = this.userRepository.create({
+      ...createUserDto,
+      version: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+    return (await this.userRepository.save(user)).toResponse();
   }
 
-  findAll(): Omit<User, 'password'>[] {
-    return this._users.map((user) => removePassword(user));
+  async findAll(): Promise<Omit<IUser, 'password'>[]> {
+    const users = await this.userRepository.find();
+    return users.map((user) => user.toResponse());
   }
 
-  findOne(id: string): Omit<User, 'password'> {
-    validateUUID(id);
-    const { element } = findElementById(this._users, id);
-    return removePassword(element as User);
+  async findOne(id: string): Promise<Omit<IUser, 'password'>> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (user) return user.toResponse();
+    throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
   }
 
-  update(id: string, updateUserDto: UpdateUserDto): Omit<User, 'password'> {
-    validateUUID(id);
-    const { index } = findElementById(this._users, id);
-    validatePassword(this._users[index].password, updateUserDto.oldPassword);
-    const { version, createdAt } = this._users[index];
-    this._users[index] = new User(
-      id,
-      {
-        ...this._users[index],
-        ...{
-          password: updateUserDto.newPassword,
-        },
-      },
-      version + 1,
-      createdAt,
-    );
-    return removePassword(this._users[index]);
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<Omit<IUser, 'password'>> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    const { oldPassword, newPassword } = updateUserDto;
+    const { version } = user;
+    validatePassword(user.password, oldPassword);
+    const updatedUser = Object.assign(user, {
+      password: newPassword,
+      version: version + 1,
+      updatedAt: Date.now(),
+    });
+    return (await this.userRepository.save(updatedUser)).toResponse();
   }
 
-  remove(id: string): void {
-    validateUUID(id);
-    this._users = removeElement(this._users, id, idFilter);
+  async delete(id: string): Promise<void> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
+      throw new HttpException(Messages.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
   }
 }

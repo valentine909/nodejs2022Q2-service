@@ -7,12 +7,13 @@ import {
   Delete,
   Put,
   HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 import { Routes } from '../utils/constants';
+import { IUser } from './interface/user.interface';
 
 @Controller(Routes.user)
 export class UserController {
@@ -20,31 +21,37 @@ export class UserController {
 
   @Post()
   @HttpCode(201)
-  create(@Body() createUserDto: CreateUserDto): Omit<User, 'password'> {
+  create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<Omit<IUser, 'password'>> {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  findAll(): Omit<User, 'password'>[] {
+  findAll(): Promise<Omit<IUser, 'password'>[]> {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Omit<User, 'password'> {
+  findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<Omit<IUser, 'password'>> {
     return this.userService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): Omit<User, 'password'> {
+  ): Promise<Omit<IUser, 'password'>> {
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string): void {
-    return this.userService.remove(id);
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<void> {
+    return await this.userService.delete(id);
   }
 }

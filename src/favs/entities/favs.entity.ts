@@ -1,12 +1,16 @@
-import { IsArray } from 'class-validator';
+import { Entity, Column, BaseEntity, PrimaryGeneratedColumn } from 'typeorm';
 
-export class Favourites {
-  @IsArray()
+@Entity()
+export class FavouritesEntity extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column('varchar', { array: true })
   artists: string[];
 
-  @IsArray()
+  @Column('varchar', { array: true })
   albums: string[];
 
-  @IsArray()
+  @Column('varchar', { array: true })
   tracks: string[];
 }

@@ -1,25 +1,16 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { CreateAlbumDto } from '../dto/create-album.dto';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export class Album {
-  constructor(id: string, dto: CreateAlbumDto) {
-    this.id = id;
-    this.name = dto.name;
-    this.artistId = dto.artistId || null;
-    this.year = dto.year;
-  }
+@Entity()
+export class AlbumEntity extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @IsString()
-  id;
+  @Column()
+  name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  name;
+  @Column()
+  year: number;
 
-  @IsInt()
-  year;
-
-  @IsString()
-  @IsOptional()
-  artistId;
+  @Column({ nullable: true })
+  artistId: string;
 }

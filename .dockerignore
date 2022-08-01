@@ -9,3 +9,5 @@ test
 README.md
 docker-compose.yml
 docker-compose.development.yml
+/pgdata
+/pglog

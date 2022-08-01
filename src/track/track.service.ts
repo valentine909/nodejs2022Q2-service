@@ -1,48 +1,60 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Track } from './entities/track.entity';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  findElementById,
-  idFilter,
-  removeElement,
-  validateUUID,
-} from '../utils/helpers';
+import { TrackEntity } from './entities/track.entity';
+import { ITrack } from './interface/track.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  private _tracks: Track[] = [];
+  constructor(
+    @InjectRepository(TrackEntity)
+    private trackRepository: Repository<TrackEntity>,
+  ) {}
 
-  create(createTrackDto: CreateTrackDto): Track {
-    const id = uuidv4();
-    const track = new Track(id, createTrackDto);
-    this._tracks.push(track);
-    return track;
+  async create(createTrackDto: CreateTrackDto): Promise<ITrack> {
+    const track = this.trackRepository.create(createTrackDto);
+    return await this.trackRepository.save(track);
   }
 
-  findAll(): Track[] {
-    return this._tracks;
+  async findAll(): Promise<ITrack[]> {
+    return await this.trackRepository.find();
   }
 
-  findOne(id: string): Track {
-    validateUUID(id);
-    const { element } = findElementById(this._tracks, id);
-    return element;
+  async findOne(id: string): Promise<ITrack> {
+    return await this.trackRepository.findOne({ where: { id } });
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto): Track {
-    validateUUID(id);
-    const { index } = findElementById(this._tracks, id);
-    this._tracks[index] = new Track(id, {
-      ...this._tracks[index],
-      ...updateTrackDto,
-    });
-    return this._tracks[index];
+  async update(id: string, updateTrackDto: UpdateTrackDto): Promise<ITrack> {
+    const track = await this.trackRepository.findOne({ where: { id } });
+    if (!track) {
+      return track;
+    }
+    const updatedTrack = Object.assign(track, updateTrackDto);
+    return await this.trackRepository.save(updatedTrack);
   }
 
-  remove(id: string): void {
-    validateUUID(id);
-    this._tracks = removeElement(this._tracks, id, idFilter);
+  async delete(id: string): Promise<number> {
+    const { affected } = await this.trackRepository.delete(id);
+    if (affected === 0) {
+      return affected;
+    }
+  }
+
+  async nullArtist(id: string): Promise<void> {
+    const tracks = await this.findAll();
+    const promisesToProcess = tracks
+      .filter((track) => track.artistId === id)
+      .map((track) => this.update(track.id, { artistId: null }));
+    await Promise.all(promisesToProcess);
+  }
+
+  async nullAlbum(id: string): Promise<void> {
+    const tracks = await this.findAll();
+    const promisesToProcess = tracks
+      .filter((track) => track.albumId === id)
+      .map((track) => this.update(track.id, { albumId: null }));
+    await Promise.all(promisesToProcess);
   }
 }
